@@ -89,7 +89,7 @@ def execution_time():
 
     return ret_list
 
-def outdated_packages_list(request_file='requirements.txt'):
+def outdated_packages_list(request_file='request.txt'):
     logging.info("Checking outdated dependencies")
     
     # Step 1: Run pip list to get outdated packages
