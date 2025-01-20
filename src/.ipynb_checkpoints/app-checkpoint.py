@@ -26,12 +26,17 @@ def predict():
         json: model predictions
     """
     filepath = request.get_json()['filepath']
-
+    
+    # Load the data
     df = pd.read_csv(filepath)
     df = df.drop(['corporation', 'exited'], axis=1)
 
+    # Get predictions from diagnostics
     preds = diagnostics.model_predictions(df)
-    return jsonify(preds.tolist())
+
+    preds = preds.tolist()  # Convert pandas Series to list
+
+    return jsonify(preds)
 
 @app.route("/scoring", methods=['GET', 'OPTIONS'])
 def score():
@@ -78,21 +83,14 @@ def diag():
     time = diagnostics.execution_time()
     outdated = diagnostics.outdated_packages_list()
 
-    # Convert numpy types and DataFrame to serializable formats
-    time_serializable = [{'ingest_time_mean': float(item['ingest_time_mean'])} for item in time]
-    time_serializable += [{'train_time_mean': float(item['train_time_mean'])} for item in time]
-
-    outdated_serializable = outdated.to_dict(orient='records')  # Convert DataFrame to list of dicts
-
     ret = {
         'missing_percentage': missing,
-        'execution_time': time_serializable,
-        'outdated_packages': outdated_serializable
+        'execution_time': time,
+        'outdated_packages': outdated
     }
 
     return jsonify(ret)
 
 
-
 if __name__ == "__main__":    
-    app.run(host='0.0.0.1', port=6000, debug=True, threaded=True)
+    app.run(host='0.0.0.0', port=5000, debug=True, threaded=True)

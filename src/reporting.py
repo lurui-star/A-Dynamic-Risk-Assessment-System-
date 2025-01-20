@@ -16,10 +16,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib.colors import lavender, red, green
-import diagnostics 
+from src import diagnostics 
 
-
-###############Load config.json and get path variables
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 with open('src/config.json','r') as f:
     config = json.load(f) 
@@ -28,7 +26,6 @@ prod_deployment_path = os.path.join(config['prod_deployment_path'])
 data_path=os.path.join(config['output_folder_path']) 
 test_data_path=os.path.join(config['test_data_path']) 
 
-##############Function for reporting
 def plot_confusion_matrix():
     """
     Reporting: calculate a confusion matrix using the test data and the deployed model. Write the confusion matrix to

@@ -42,7 +42,6 @@ def dataframe_summary():
         mean = data_df[col].mean()
         median = data_df[col].median()
         std = data_df[col].std()
-    
         statistics_dict[col] = {'mean': mean, 'median': median, 'std': std}
     return(statistics_dict)
 
