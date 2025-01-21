@@ -70,6 +70,7 @@ def main():
     logging.info("Generating diagnostics and reports...")
     reporting.plot_confusion_matrix()
     reporting.generate_pdf_report(prod_deployment_path, data_path)
+    os.system("python src/apicalls.py")
 
 if __name__ == '__main__':
     main()
