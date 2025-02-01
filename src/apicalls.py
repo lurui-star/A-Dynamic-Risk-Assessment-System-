@@ -15,7 +15,7 @@ import sys
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 # Load config file
-### upload the dependent files 
+# upload the dependent files
 with open('src/config.json', 'r') as f:
     config = json.load(f)
 prod_deployment_path = os.path.join(config['prod_deployment_path'])
@@ -28,8 +28,9 @@ logging.info(f"iniciate app at {URL}")
 subprocess.Popen(["python", "src/app.py"])
 time.sleep(2)
 
-logging.info( f"Post request /prediction for {test_data_file}")
-response_pred = requests.post(f'{URL}/prediction',json={'filepath': test_data_file }).text
+logging.info(f"Post request /prediction for {test_data_file}")
+response_pred = requests.post(
+    f'{URL}/prediction', json={'filepath': test_data_file}).text
 
 logging.info("Get request /scoring")
 response_scor = requests.get(f'{URL}/scoring').text

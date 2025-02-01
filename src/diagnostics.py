@@ -17,19 +17,22 @@ import yaml
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
-with open('src/config.json','r') as f:
-    config = json.load(f) 
+with open('src/config.json', 'r') as f:
+    config = json.load(f)
 
-prod_deployment_path = os.path.join(config['prod_deployment_path']) 
-data_path=os.path.join(config['output_folder_path']) 
-test_data_path=os.path.join(config['test_data_path']) 
+prod_deployment_path = os.path.join(config['prod_deployment_path'])
+data_path = os.path.join(config['output_folder_path'])
+test_data_path = os.path.join(config['test_data_path'])
+
 
 def model_predictions(X_df):
     logging.info("Loading deployed model")
-    model = pickle.load(open(os.path.join(prod_deployment_path,'trainedmodel.pkl'), 'rb'))
+    model = pickle.load(
+        open(os.path.join(prod_deployment_path, 'trainedmodel.pkl'), 'rb'))
     logging.info("Running predictions on data")
     y_pred = model.predict(X_df)
     return y_pred
+
 
 def dataframe_summary():
     logging.info("Loading and preparing finaldata.csv")
@@ -43,7 +46,7 @@ def dataframe_summary():
         median = data_df[col].median()
         std = data_df[col].std()
         statistics_dict[col] = {'mean': mean, 'median': median, 'std': std}
-    return(statistics_dict)
+    return (statistics_dict)
 
 
 def missing_percentage():
@@ -53,7 +56,7 @@ def missing_percentage():
     missing_list = {col: {'percentage': perc} for col, perc in zip(
         data_df.columns, data_df.isna().sum() / data_df.shape[0] * 100)}
 
-    return( missing_list)
+    return (missing_list)
 
 
 def _ingestion_timing():
@@ -62,11 +65,13 @@ def _ingestion_timing():
     timing = timeit.default_timer() - starttime
     return timing
 
+
 def _training_timing():
     starttime = timeit.default_timer()
     _ = subprocess.run(['python', 'training.py'], capture_output=True)
     timing = timeit.default_timer() - starttime
     return timing
+
 
 def execution_time():
     logging.info("Calculating time for ingestion.py")
@@ -88,9 +93,10 @@ def execution_time():
 
     return ret_list
 
+
 def outdated_packages_list(request_file='requirements.txt'):
     logging.info("Checking outdated dependencies")
-    
+
     # Step 1: Run pip list to get outdated packages
     result = subprocess.run(
         ['pip', 'list', '--outdated'],
@@ -106,7 +112,8 @@ def outdated_packages_list(request_file='requirements.txt'):
 
     dep = result.stdout
     # Split lines and ignore the first 2 (header lines)
-    dep_lines = dep.split('\n')[2:]  # Skip the first two lines of the output header
+    # Skip the first two lines of the output header
+    dep_lines = dep.split('\n')[2:]
 
     # Step 2: Parse the pip list output
     outdated_deps = []
@@ -120,23 +127,26 @@ def outdated_packages_list(request_file='requirements.txt'):
                     'current_version': parts[1],
                     'latest_version': parts[2]
                 })
-    
+
     # Convert the outdated list to a DataFrame
     outdated_deps_df = pd.DataFrame(outdated_deps)
-    
+
     # Step 3: Read the request.txt file to get the list of packages
     try:
         with open(request_file, 'r') as f:
-            requested_packages = [line.strip().split('==')[0] for line in f if line.strip()]
+            requested_packages = [line.strip().split('==')[0]
+                                  for line in f if line.strip()]
     except FileNotFoundError:
         logging.error(f"File {request_file} not found.")
         return outdated_deps_df
 
     # Step 4: Filter outdated packages that are in request.txt
-    requested_outdated_deps = outdated_deps_df[outdated_deps_df['package'].isin(requested_packages)]
-    
+    requested_outdated_deps = outdated_deps_df[outdated_deps_df['package'].isin(
+        requested_packages)]
+
     # Return only the outdated packages that are in request.txt, without extra print/logging
     return requested_outdated_deps
+
 
 if __name__ == '__main__':
 

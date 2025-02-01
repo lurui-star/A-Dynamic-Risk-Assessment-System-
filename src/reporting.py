@@ -16,15 +16,16 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import Table, TableStyle
 from reportlab.lib.colors import lavender, red, green
-from src import diagnostics 
+from src import diagnostics
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-with open('src/config.json','r') as f:
-    config = json.load(f) 
+with open('src/config.json', 'r') as f:
+    config = json.load(f)
 
-prod_deployment_path = os.path.join(config['prod_deployment_path']) 
-data_path=os.path.join(config['output_folder_path']) 
-test_data_path=os.path.join(config['test_data_path']) 
+prod_deployment_path = os.path.join(config['prod_deployment_path'])
+data_path = os.path.join(config['output_folder_path'])
+test_data_path = os.path.join(config['test_data_path'])
+
 
 def plot_confusion_matrix():
     """
@@ -51,6 +52,7 @@ def plot_confusion_matrix():
     plt.savefig(os.path.join(prod_deployment_path, 'confusionmatrix.png'))
     logging.info(f"confusion matrix saved in {prod_deployment_path}")
 
+
 def _get_statistics_df():
     """
     Get data statistics and missing percentage of each column
@@ -60,8 +62,10 @@ def _get_statistics_df():
         pd.DataFrame: Train data summary
     """
     # Assuming diagnostics.dataframe_summary() and diagnostics.missing_percentage() return dictionaries
-    stats = diagnostics.dataframe_summary()  # Returns stats per column (e.g., mean, std, etc.)
-    missing = diagnostics.missing_percentage()  # Returns missing percentage per column
+    # Returns stats per column (e.g., mean, std, etc.)
+    stats = diagnostics.dataframe_summary()
+    # Returns missing percentage per column
+    missing = diagnostics.missing_percentage()
 
     # Create the base dataframe with column names and missing percentages
     columns = ['Column Name', 'Missing %']
@@ -71,16 +75,20 @@ def _get_statistics_df():
     }
 
     # Now loop through each statistic (e.g., mean, median, std) and add to the dataframe
-    temp_col = list(stats.keys())[0]  # Get any column to check the stats structure
+    # Get any column to check the stats structure
+    temp_col = list(stats.keys())[0]
     for stat in stats[temp_col].keys():
         data[stat] = [
-            round(stats[column].get(stat, None), 2) if stats.get(column) else '-' 
+            round(stats[column].get(stat, None),
+                  2) if stats.get(column) else '-'
             for column in missing.keys()
         ]
 
     # Convert the dictionary to DataFrame and return
     df = pd.DataFrame(data)
     return df
+
+
 def generate_pdf_report(prod_deployment_path, data_path):
     """
     Generate PDF report that includes ingested data information, model scores
@@ -202,7 +210,8 @@ def generate_pdf_report(prod_deployment_path, data_path):
     table_style.add('GRID', (0, 0), (-1, -1), 1, 'black')
     table_style.add('BACKGROUND', (0, 0), (-1, 0), lavender)
 
-    for row, values in enumerate(data[1:], start=1):  # Start at row 1 to skip header
+    # Start at row 1 to skip header
+    for row, values in enumerate(data[1:], start=1):
         if values[1] != values[2]:
             table_style.add('TEXTCOLOR', (1, row), (1, row), red)
             table_style.add('TEXTCOLOR', (2, row), (2, row), green)
@@ -220,6 +229,7 @@ def generate_pdf_report(prod_deployment_path, data_path):
     pdf.save()
     print(f"PDF report generated: {pdf_filename}")
 
+
 if __name__ == '__main__':
     logging.info("Running reporting.py")
 
@@ -227,4 +237,4 @@ if __name__ == '__main__':
     plot_confusion_matrix()
 
     logging.info("Generating PDF report")
-    generate_pdf_report(prod_deployment_path,data_path)
+    generate_pdf_report(prod_deployment_path, data_path)

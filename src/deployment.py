@@ -14,23 +14,29 @@ from sklearn.linear_model import LogisticRegression
 import json
 import shutil
 
-##################Load config.json and correct path variable
-with open('src/config.json','r') as f:
-    config = json.load(f) 
+# Load config.json and correct path variable
+with open('src/config.json', 'r') as f:
+    config = json.load(f)
 
-dataset_csv_path = os.path.join(config['output_folder_path']) 
-model_path = os.path.join(config['output_model_path']) 
-prod_deployment_path = os.path.join(config['prod_deployment_path']) 
+dataset_csv_path = os.path.join(config['output_folder_path'])
+model_path = os.path.join(config['output_model_path'])
+prod_deployment_path = os.path.join(config['prod_deployment_path'])
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-####################function for deployment
+# function for deployment
+
+
 def deploy_model():
     logging.info("Deploying trained model to production")
-    logging.info("Copying trainedmodel.pkl, ingestfiles.txt and latestscore.txt")
-    shutil.copy(os.path.join(dataset_csv_path,'ingestedfiles.txt'),prod_deployment_path)
-    shutil.copy(os.path.join(model_path,'trainedmodel.pkl'),prod_deployment_path)
-    shutil.copy(os.path.join(model_path,'latestscore.txt'),prod_deployment_path)
-        
+    logging.info(
+        "Copying trainedmodel.pkl, ingestfiles.txt and latestscore.txt")
+    shutil.copy(os.path.join(dataset_csv_path,
+                'ingestedfiles.txt'), prod_deployment_path)
+    shutil.copy(os.path.join(model_path, 'trainedmodel.pkl'),
+                prod_deployment_path)
+    shutil.copy(os.path.join(model_path, 'latestscore.txt'),
+                prod_deployment_path)
+
+
 if __name__ == '__main__':
     logging.info("Running deployment.py")
     deploy_model()
-

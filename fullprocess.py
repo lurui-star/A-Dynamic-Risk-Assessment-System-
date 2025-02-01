@@ -21,22 +21,23 @@ from src import diagnostics
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 
-### Config information 
+# Config information
 with open('src/config.json', 'r') as f:
     config = json.load(f)
 
 input_folder_path = config['input_folder_path']
 output_folder_path = config['output_folder_path']
-prod_deployment_path = os.path.join(config['prod_deployment_path']) 
-data_path=os.path.join(config['output_folder_path']) 
+prod_deployment_path = os.path.join(config['prod_deployment_path'])
+data_path = os.path.join(config['output_folder_path'])
 
 
 def main():
     # Step I: Check for new data
     logging.info("Checking for new data...")
-    ingested_files = set(open(os.path.join(prod_deployment_path, "ingestedfiles.txt")).readlines()[1:])
+    ingested_files = set(
+        open(os.path.join(prod_deployment_path, "ingestedfiles.txt")).readlines()[1:])
     source_files = set(os.listdir(input_folder_path))
-    
+
     # If no new data, exit
     if not source_files.difference(ingested_files):
         logging.info("No fresh data found.")
@@ -48,9 +49,11 @@ def main():
 
     # Step III: Check for model drift
     logging.info("Checking for model drift...")
-    deployed_score = float(re.findall(r'\d*\.?\d+', open(os.path.join(prod_deployment_path, "latestscore.txt")).read())[0])
+    deployed_score = float(re.findall(
+        r'\d*\.?\d+', open(os.path.join(prod_deployment_path, "latestscore.txt")).read())[0])
     data_df = pd.read_csv(os.path.join(output_folder_path, 'finaldata.csv'))
-    X_df, y_df = data_df.drop(['corporation', 'exited'], axis=1), data_df['exited']
+    X_df, y_df = data_df.drop(
+        ['corporation', 'exited'], axis=1), data_df['exited']
     y_pred = diagnostics.model_predictions(X_df)
     new_score = f1_score(y_df, y_pred)
 
@@ -71,6 +74,7 @@ def main():
     reporting.plot_confusion_matrix()
     reporting.generate_pdf_report(prod_deployment_path, data_path)
     os.system("python src/apicalls.py")
+
 
 if __name__ == '__main__':
     main()
